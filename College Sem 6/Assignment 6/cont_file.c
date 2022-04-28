@@ -19,10 +19,13 @@ void addToDirectory(struct dir_entry *ptr);
 void createNewFile();
 int check_empty_blocks(int len);
 void allocate_blocks(int sb, int len);
+void delete_file();
 
 int main()
 {
     int choice;
+    struct dir_entry *ptr;
+    char fn[20];
     createBitVector();
 
     do
@@ -45,6 +48,9 @@ int main()
         case 3:
             showDirectory();
             break;
+        case 4:
+            delete_file();
+            break;
         case 5:
             break;
         default:
@@ -53,6 +59,14 @@ int main()
         }
 
     } while (choice != 5);
+
+    for(ptr = front; ptr != NULL; ptr = ptr->next)
+    {
+        sprintf(fn, "./files/%s", ptr->filename);
+        remove(fn);
+    }
+    
+    return 0;
 }
 
 void createBitVector()
@@ -102,7 +116,7 @@ void createNewFile()
 
 
 
-    printf("Enter length:");
+    printf("\nEnter length:");
     scanf("%d", &len);
     n->length = len;
     addToDirectory(n);
@@ -133,7 +147,6 @@ void addToDirectory(struct dir_entry *ptr)
     }
 }
 
-// allo
 void allocate_blocks(int sb, int len)
 {
     int i = 0;
@@ -173,4 +186,33 @@ void showDirectory()
             printf("%s\t\t%d\t%d", ptr->filename, ptr->start_block, ptr->length);
         printf("\n");
     }
+}
+
+void delete_file()
+{
+    char fn[10], temp[50];
+    struct dir_entry *ptr, *parent = NULL;
+    int j;
+    printf("Enter file name to delete :");
+    scanf("%s", fn);
+
+    for(ptr = front; ptr != NULL; ptr = ptr->next)
+    {
+        if(strcmp(ptr->filename, fn) == 0)
+        {
+            sprintf(temp, "./files/%s", fn);
+            for(j = ptr->start_block; j < ptr->length; j++)
+                bit_verctor[j] = 1;
+            remove(temp);
+
+            if(parent == NULL)
+                front = front->next;
+            else
+                parent->next= ptr->next;
+            return;
+        }
+        parent = ptr;
+    }
+
+    printf("\nfile does not exists.\n");
 }
