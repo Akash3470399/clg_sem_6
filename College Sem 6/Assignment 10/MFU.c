@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-int **frames, p, n, next = 0, prs[100], page_faults = 0, counter = 1;
+int **frames, p, n, next = 0, prs[100], page_faults = 0, counter = 1, default_max = 10000;
 
 int is_present(int key)
 {
@@ -15,17 +15,30 @@ int is_present(int key)
     return 0;
 }
 
-int min_count_index()
+int max_count_index()
 {
-    int i = 0, min_count = 100000, index = -1;
+    int i = 0, j = 0, max_count = -1, index = -1,last;
     for (i = 0; i < n; i++)
     {
-        if (frames[i][1] < min_count)
+        if (frames[i][1] > max_count)
         {
-            min_count = frames[i][1];
+            max_count = frames[i][1];
             index = i;
         }
+        else if(frames[i][1] == max_count && frames[i][1] != default_max)
+        {
+            last = frames[0][2];
+            for(j = 0; j < n; j++)
+            {
+                if(frames[j][2] < last)
+                {
+                    index = j;
+                    last = frames[j][2];
+                }
+            }
+        }
     }
+
     return index;
 }
 
@@ -37,7 +50,7 @@ void printFrames()
     printf("\n");
 }
 
-void lru()
+void mfu()
 {
     int i, j, index = 0;
     for (i = 0; i < p; i++)
@@ -48,22 +61,26 @@ void lru()
             {
                 if (frames[j][0] == prs[i])
                 {
-                    frames[j][1] = counter;
+                    frames[j][1] += 1;
+                    frames[j][2] = counter++;
                     break;
                 }
             }
         }
         else
         {
-            index = min_count_index();
+            index = max_count_index();
             frames[index][0] = prs[i];
-            frames[index][1] = counter;
+            frames[index][1] = 0;
+            frames[index][2] = counter++;
             page_faults++;
         }
         printFrames();
-        counter++;
+
     }
 }
+
+
 
 int main()
 {
@@ -77,9 +94,10 @@ int main()
     frames = (int **)malloc(sizeof(int *) * n);
     for (i = 0; i < n; i++)
     {
-        frames[i] = (int *)malloc(sizeof(int) * 2);
+        frames[i] = (int *)malloc(sizeof(int) * 3);
         frames[i][0] = -1;
-        frames[i][1] = -1;
+        frames[i][1] = default_max;
+        frames[i][2] = -1;
     }
 
     printf("Enter Page referance string:\n(separated by space):");
@@ -89,8 +107,8 @@ int main()
         scanf("%d", &prs[i++]);
     } while (getchar() != '\n' && i < p);
 
-    lru();
+    mfu();
+    printf("\nTotal page faults: %d\n", page_faults);
 
-    printf("\nTotal page faults :%d\n", page_faults);
     return 0;
 }

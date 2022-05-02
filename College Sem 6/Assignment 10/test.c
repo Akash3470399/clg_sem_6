@@ -90,7 +90,5 @@ int main()
     } while (getchar() != '\n' && i < p);
 
     lru();
-
-    printf("\nTotal page faults :%d\n", page_faults);
     return 0;
 }
