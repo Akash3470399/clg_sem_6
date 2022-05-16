@@ -9,7 +9,7 @@ struct block
 {
     int block_num;
     struct block *next;
-} *b_front = NULL, *b_rear =NULL;
+} *b_front = NULL, *b_rear = NULL;
 
 struct dir_entry
 {
@@ -22,10 +22,11 @@ void createBitVector();
 void showBitVector();
 int freeBlockCount();
 void addNewFile();
-void createBlocks(int);
+void allocate_blocks(struct dir_entry *);
+void delete_blocks(struct dir_entry *);
 void addToDirectory(struct dir_entry *ptr);
+void delete_file();
 void showDirectory();
-
 
 int main()
 {
@@ -55,7 +56,7 @@ int main()
             showDirectory();
             break;
         case 4:
-            //delete_file();
+            delete_file();
             break;
         case 5:
             break;
@@ -65,6 +66,12 @@ int main()
         }
 
     } while (choice != 5);
+
+    for (ptr = front; ptr != NULL; ptr = ptr->next)
+    {
+        sprintf(fn, "./files/%s", ptr->filename);
+        remove(fn);
+    }
 
     return 0;
 }
@@ -117,7 +124,6 @@ void addNewFile()
 
     for (ptr = front; ptr != NULL; ptr = ptr->next)
     {
-        printf("%s", ptr->filename);
         if (strcmp(ptr->filename, fn) == 0)
         {
             printf("File with name %s already exists.\n", fn);
@@ -132,23 +138,82 @@ void addNewFile()
     scanf("%d", &len);
     n->length = len;
 
-    if(len < freeBlockCount())
+    if (len <= freeBlockCount())
     {
         sprintf(temp, "./files/%s", fn);
         fp = fopen(temp, "w");
-
-        if(b_front == NULL)
-            n->start_block = 0;
-        else
-            n->start_block = b_rear->block_num + 1;
-        n->end_block = n->start_block + len;
+        allocate_blocks(n);
         addToDirectory(n);
-        createBlocks(len);
     }
     else
     {
         printf("\nCan't allocate memory to file. Free blocks not available.\n");
         free(n);
+    }
+}
+
+void allocate_blocks(struct dir_entry *n)
+{
+
+    int i = 0, allocated = 0;
+    struct block *newBlock = NULL, *ptr;
+
+    while (allocated != n->length)
+    {
+        if (bit_verctor[i] == 1)
+        {
+            newBlock = (struct block *)malloc(sizeof(struct block));
+            newBlock->block_num = i;
+
+            if (b_front == NULL)
+            {
+                b_front = newBlock;
+                b_rear = b_front;
+            }
+            else
+            {
+                b_rear->next = newBlock;
+                b_rear = b_rear->next;
+            }
+            allocated++;
+            bit_verctor[i] = 0;
+
+            if (allocated == 1)
+                n->start_block = i;
+            else if (allocated == n->length)
+                n->end_block = i;
+        }
+
+        i++;
+    }
+}
+
+void delete_blocks(struct dir_entry *n)
+{
+    struct block *ptr = b_front, *parent = NULL;
+    int start_block = n->start_block, deleted = 0;
+
+    for (ptr = b_front; n->start_block != ptr->block_num; ptr = ptr->next)
+        parent = ptr;
+
+    while (deleted != n->length)
+    {
+        if (parent == NULL)
+        {
+            ptr = b_front;
+            b_front = b_front->next;
+            bit_verctor[ptr->block_num] = 1;
+            free(ptr);
+        }
+        else
+        {
+            ptr = parent->next;
+            parent->next = ptr->next;
+            bit_verctor[ptr->block_num] = 1;
+            free(ptr);
+        }
+        deleted++;
+
     }
 }
 
@@ -166,25 +231,33 @@ void addToDirectory(struct dir_entry *ptr)
     }
 }
 
-void createBlocks(int len)
+void delete_file()
 {
-    struct block *b;
-    int i;
-    for(i = 0; i < len; i++)
-    { 
-        b = (struct block *)malloc(sizeof(struct block));
-        if(b_front == NULL)
+    char fn[10], temp[50];
+    struct dir_entry *ptr, *parent = NULL;
+    printf("Enter file name to delete :");
+    scanf("%s", fn);
+
+    for (ptr = front; ptr != NULL; ptr = ptr->next)
+    {
+        if (strcmp(ptr->filename, fn) == 0)
         {
-            b->block_num = 0;
-            b_front = b;
-            b_rear = b_front;
+            sprintf(temp, "./files/%s", fn);
+            remove(temp);
+
+            if (parent == NULL)
+            {
+                delete_blocks(front);
+                front = front->next;
+            }
+            else
+            {
+                delete_blocks(parent->next);
+                parent->next = ptr->next;
+            }
+            return;
         }
-        {
-            b->block_num = b_rear->block_num + 1;
-            b_rear->next = b;
-            b_rear = b_rear->next;
-        }
-        bit_verctor[b->block_num] = 0;
+        parent = ptr;
     }
 }
 
@@ -195,9 +268,9 @@ void showDirectory()
         printf("\nDirectory is empty.\n");
     else
     {
-        printf("\nDirectory\nFile    \tStart Block\tlength\n");
+        printf("\nDirectory\nFile    \tStart Block\t End Block\tlength\n");
         for (ptr = front; ptr != NULL; ptr = ptr->next)
-            printf("%s\t\t%d\t%d\n", ptr->filename, ptr->start_block, ptr->length);
+            printf("%s\t\t%d\t%d\t%d\n", ptr->filename, ptr->start_block, ptr->end_block, ptr->length);
         printf("\n");
     }
 }
