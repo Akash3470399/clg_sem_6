@@ -17,7 +17,7 @@ int is_present(int key)
 
 int max_count_index()
 {
-    int i = 0, j = 0, max_count = -1, index = -1,last;
+    int i = 0, j = 0, max_count = -1, index = -1, last;
     for (i = 0; i < n; i++)
     {
         if (frames[i][1] > max_count)
@@ -25,12 +25,12 @@ int max_count_index()
             max_count = frames[i][1];
             index = i;
         }
-        else if(frames[i][1] == max_count && frames[i][1] != default_max)
+        else if (frames[i][1] == max_count && frames[i][1] != default_max)
         {
             last = frames[0][2];
-            for(j = 0; j < n; j++)
+            for (j = 0; j < n; j++)
             {
-                if(frames[j][2] < last)
+                if (frames[j][2] < last)
                 {
                     index = j;
                     last = frames[j][2];
@@ -62,7 +62,7 @@ void mfu()
                 if (frames[j][0] == prs[i])
                 {
                     frames[j][1] += 1;
-                    frames[j][2] = counter++;
+                    frames[j][2] = counter;
                     break;
                 }
             }
@@ -72,15 +72,13 @@ void mfu()
             index = max_count_index();
             frames[index][0] = prs[i];
             frames[index][1] = 0;
-            frames[index][2] = counter++;
+            frames[index][2] = counter;
             page_faults++;
         }
         printFrames();
-
+        counter++;
     }
 }
-
-
 
 int main()
 {
@@ -100,13 +98,12 @@ int main()
         frames[i][2] = -1;
     }
 
-    printf("Enter Page referance string:\n(separated by space):");
-    i = 0;
-    do
-    {
-        scanf("%d", &prs[i++]);
-    } while (getchar() != '\n' && i < p);
+    printf("Enter Page referance string:");
+    for (i = 0; i < p; i++)
+        scanf("%d", &prs[i]);
 
+
+    system("clear");
     mfu();
     printf("\nTotal page faults: %d\n", page_faults);
 

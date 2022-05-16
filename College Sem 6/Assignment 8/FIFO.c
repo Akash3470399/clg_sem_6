@@ -4,7 +4,7 @@
 
 int *frames, p, n, next = 0, prs[100], page_faults = 0;
 
-int is_present(int key);
+int is_present(int page);
 void printFrames();
 void fifo();
 
@@ -21,13 +21,10 @@ int main()
     for (i = 0; i < n; i++)
         frames[i] = -1;
 
-    printf("Enter Page referance string:\n(separated by space):");
-    i = 0;
-    do
-    {
-        scanf("%d", &prs[i++]);
-    } while (getchar() != '\n' && i < p);
-
+    printf("Enter Page referance string");
+    for(i = 0; i < p;i++)
+        scanf("%d", &prs[i]);
+    system("clear");
     fifo();
     printf("\nTotal page faults :%d\n", page_faults);
 
@@ -37,7 +34,7 @@ int main()
 void fifo()
 {
     int i = 0;
-    printf("\nFrames at every page:\n");
+    printf("\nFrames:\n");
     for (i = 0; i < p; i++)
     {
         if (!is_present(prs[i]))
@@ -51,12 +48,12 @@ void fifo()
     }
 }
 
-int is_present(int key)
+int is_present(int page)
 {
     int i;
     for (i = 0; i < n; i++)
     {
-        if (frames[i] == key)
+        if (frames[i] == page)
             return 1;
     }
 

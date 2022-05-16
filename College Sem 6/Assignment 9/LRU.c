@@ -82,13 +82,11 @@ int main()
         frames[i][1] = -1;
     }
 
-    printf("Enter Page referance string:\n(separated by space):");
-    i = 0;
-    do
-    {
-        scanf("%d", &prs[i++]);
-    } while (getchar() != '\n' && i < p);
+    printf("Enter Page referance string:");
+    for(i = 0; i < p; i++)
+        scanf("%d", &prs[i]);
 
+    system("clear");
     lru();
 
     printf("\nTotal page faults :%d\n", page_faults);
