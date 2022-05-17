@@ -100,19 +100,21 @@ void createNewFile()
     char fn[10], temp[50];
     int sb, len;
     struct dir_entry *n = (struct dir_entry *)malloc(sizeof(struct dir_entry)), *ptr;
+
     printf("\nEnter file name:");
     scanf("%s", fn);
 
     for (ptr = front; ptr != NULL; ptr = ptr->next)
-    {printf("%s", ptr->filename);
+    {
         if (strcmp(ptr->filename, fn) == 0)
         {
             printf("File with name %s already exists.\n", fn);
+            free(n);
             return;
         }
     }
 
-    strcpy(n->filename, fn);
+    strcpy(n->filename, fn);                                                                                                                                                  
 
 
 
