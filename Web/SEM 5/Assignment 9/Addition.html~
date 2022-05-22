@@ -1,0 +1,19 @@
+<DOCTYPE html>
+<html>
+	<head>
+		<title>Addition</title>
+	</head>
+
+	<body>
+
+	<script>
+		var a = prompt("Enter value of a ");
+		var b = prompt("Enter value of b ");
+		var sum = Number(a) + Number(b);
+
+		alert("sum is " + sum);
+		
+	</script>	
+	</body>
+
+</html>

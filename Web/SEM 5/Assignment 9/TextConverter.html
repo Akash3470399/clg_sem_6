@@ -1,0 +1,24 @@
+<DOCTYPE html>
+<html>
+	<head>
+		<title>Text converter</title>
+		<meta charset="UTF-8">
+	</head>
+
+	<body>
+	<form id="myForm">
+		<textarea id="myText" rows="10" cols="20"> </textarea>
+	</form>
+	<script>
+		let textarea_ = document.querySelector("#myText");
+
+		document.querySelector("body").addEventListener("change", changeCase);
+
+		function changeCase(){
+			var text = textarea_.value;
+			textarea_.value = text.toLowerCase();
+		}
+	</script>	
+	</body>
+
+</html>
